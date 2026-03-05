@@ -148,7 +148,7 @@ DELETE `/lists/{id}`
 Die Weboberfläche befindet sich unter:
 
 ```
-/app
+/
 ```
 
 Dort können Listen erstellt, Items hinzugefügt, bearbeitet und gelöscht werden.
