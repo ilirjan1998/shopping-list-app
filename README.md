@@ -1,4 +1,4 @@
-# Einkaufslisten App
+# Shopping List App (Symfony REST API)
 
 Eine kleine REST API und Weboberfläche zur Verwaltung von Einkaufslisten.
 
@@ -6,7 +6,7 @@ Das Projekt wurde mit **Symfony** entwickelt und speichert Daten in einer **MySQ
 
 ---
 
-# Features
+## Features
 
 * Einkaufslisten erstellen
 * Items zu einer Liste hinzufügen
@@ -20,16 +20,17 @@ Zusätzlich gibt es eine einfache Weboberfläche unter:
 
 ```
 http://localhost:8000/app
-
 ```
+
+---
 
 ## Screenshot
 
 ![App Screenshot](einkaufsliste1.png)
-  
+
 ---
 
-# Technologien
+## Technologien
 
 * PHP
 * Symfony
@@ -40,12 +41,12 @@ http://localhost:8000/app
 
 ---
 
-# Installation
+## Installation
 
 Repository klonen:
 
 ```
-git clone <repository-url>
+git clone https://github.com/ilirjan1998/shopping-list-app.git
 cd shopping-list-app
 ```
 
@@ -76,7 +77,7 @@ php bin/console doctrine:migrations:migrate
 
 ---
 
-# Server starten
+## Server starten
 
 ```
 php -S localhost:8000 -t public
@@ -90,100 +91,48 @@ http://localhost:8000/app
 
 ---
 
-# API Endpoints
+## API Endpoints
 
-## Liste erstellen
+### Create list
 
-POST
+POST `/lists`
 
-```
-/lists
-```
+### Add item
 
-Body Beispiel:
+POST `/lists/{id}/item`
 
-```
-{
-  "name": "Supermarkt",
-  "items": [
-    { "name": "Banane", "quantity": 4 },
-    { "name": "Milch", "quantity": 2 }
-  ]
-}
-```
+### Get all items
 
----
+GET `/lists/{id}/items`
 
-## Item hinzufügen
+### Get single item
 
-POST
+GET `/lists/{id}/items/{itemId}`
 
-```
-/lists/{id}/item
-```
+### Update item
+
+PUT `/lists/{id}/items/{itemId}`
+
+### Delete item
+
+DELETE `/lists/{id}/items/{itemId}`
+
+### Delete list
+
+DELETE `/lists/{id}`
 
 ---
 
-## Alle Items einer Liste
+## Datenbank Struktur
 
-GET
-
-```
-/lists/{id}/items
-```
-
----
-
-## Einzelnes Item anzeigen
-
-GET
-
-```
-/lists/{id}/items/{itemId}
-```
-
----
-
-## Item aktualisieren
-
-PUT
-
-```
-/lists/{id}/items/{itemId}
-```
-
----
-
-## Item löschen
-
-DELETE
-
-```
-/lists/{id}/items/{itemId}
-```
-
----
-
-## Liste löschen
-
-DELETE
-
-```
-/lists/{id}
-```
-
----
-
-# Datenbank Struktur
-
-## shopping_list
+### shopping_list
 
 | Feld | Typ     |
 | ---- | ------- |
 | id   | int     |
 | name | varchar |
 
-## item
+### item
 
 | Feld             | Typ     |
 | ---------------- | ------- |
@@ -194,7 +143,7 @@ DELETE
 
 ---
 
-# Weboberfläche
+## Weboberfläche
 
 Die Weboberfläche befindet sich unter:
 
@@ -202,7 +151,6 @@ Die Weboberfläche befindet sich unter:
 /app
 ```
 
-Dort können Listen erstellt, Items hinzugefügt und gelöscht werden.
+Dort können Listen erstellt, Items hinzugefügt, bearbeitet und gelöscht werden.
 
 ---
-
