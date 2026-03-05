@@ -285,7 +285,7 @@
   <div class="grid">
     <!-- LEFT -->
     <div class="card">
-      <h2>Einkaufsliste erstellen</h2>
+      <h2>Neue Liste erstellen</h2>
       <div class="row">
         <input id="listName" class="w-1" placeholder="z.B. Supermarkt">
         <button id="createListBtn" class="btn btn-primary">Erstellen</button>
@@ -388,7 +388,7 @@
           <span class="badge">#${it.id}</span>
           <div style="min-width:0">
             <div class="itemTitle">${escapeHtml(it.name)}</div>
-            <div class="qty">Menge: x${it.quantity}</div>
+            <div class="qty">${it.quantity} Stück</div>
           </div>
         </div>
         <div class="iconBtns">
