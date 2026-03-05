@@ -1,57 +1,337 @@
 <!doctype html>
-<html>
+<html lang="de">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Einkaufslisten</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 900px; margin: 24px auto; }
-    .row { display:flex; gap:12px; }
-    input, button { padding:10px; }
-    button { cursor:pointer; }
-    .card { border:1px solid #ddd; border-radius:10px; padding:16px; margin-top:16px; }
-    .items li { display:flex; justify-content:space-between; padding:6px 0; }
-    .muted { color:#666; font-size: 13px; }
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e2e8f0;
+      --primary:#111827;
+      --primaryText:#ffffff;
+      --danger:#ef4444;
+      --dangerText:#ffffff;
+      --shadow: 0 10px 30px rgba(2,6,23,.08);
+      --radius:16px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background:var(--bg);
+    }
+
+    .wrap{
+      max-width: 980px;
+      margin: 28px auto;
+      padding: 0 16px 28px;
+    }
+
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom: 18px;
+    }
+
+    h1{
+      margin:0;
+      font-size: 38px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle{
+      margin-top:6px;
+      color:var(--muted);
+      font-size: 14px;
+    }
+
+    .pill{
+      background: rgba(17,24,39,.08);
+      color: var(--text);
+      border: 1px solid rgba(17,24,39,.12);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      height: fit-content;
+      margin-top: 6px;
+      white-space: nowrap;
+    }
+
+    .grid{
+      display:grid;
+      gap: 16px;
+      grid-template-columns: 1fr;
+    }
+
+    @media(min-width: 900px){
+      .grid{
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .card h2{
+      margin:0 0 10px;
+      font-size: 20px;
+      letter-spacing: -0.2px;
+    }
+
+    .muted{
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .row{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+
+    input{
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      outline:none;
+      font-size: 14px;
+      background: #fff;
+    }
+    input:focus{
+      border-color: rgba(17,24,39,.35);
+      box-shadow: 0 0 0 4px rgba(17,24,39,.08);
+    }
+
+    .w-1{ flex:1; min-width: 220px; }
+    .w-small{ width: 140px; }
+
+    .btn{
+      border: 1px solid rgba(17,24,39,.12);
+      background: #fff;
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: transform .04s ease, box-shadow .12s ease, background .12s ease;
+      user-select:none;
+      white-space: nowrap;
+    }
+    .btn:hover{ background: red; }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn-primary{
+      background: var(--primary);
+      color: var(--primaryText);
+      border-color: transparent;
+    }
+    .btn-primary:hover{ filter: brightness(1.05); }
+
+    .btn-danger{
+      background: var(--danger);
+      color: var(--dangerText);
+      border-color: transparent;
+    }
+    .btn-danger:hover{ filter: brightness(1.05); }
+
+    .divider{
+      height:1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+
+    .infoBox{
+      margin-top:10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fbfdff;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    ul.items{
+      list-style:none;
+      padding:0;
+      margin: 10px 0 0;
+      display:flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .itemRow{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .itemLeft{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      min-width: 0;
+    }
+
+    .badge{
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #f8fafc;
+      flex: 0 0 auto;
+    }
+
+    .itemTitle{
+      font-weight: 700;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 360px;
+    }
+
+    .qty{
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .iconBtns{
+      display:flex;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .iconBtn{
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 16px;
+      transition: background .12s ease;
+    }
+    .iconBtn:hover{ background: #f9fafb; }
+    .iconBtn.danger:hover{ background: rgba(239,68,68,.08); }
+
+    .empty{
+      margin-top: 10px;
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .toast{
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      min-width: 280px;
+      max-width: calc(100% - 28px);
+      padding: 12px 14px;
+      border-radius: 14px;
+      color: #0b1220;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      display:none;
+      font-size: 14px;
+    }
+    .toast strong{ font-weight: 800; }
   </style>
 </head>
+
 <body>
-  <h1>Einkaufslisten</h1>
-  <p class="muted">UI nutzt deine API (Symfony Controller unter <code>/lists...</code>)</p>
+<div class="toast" id="toast"></div>
 
-  <div class="card">
-    <h2>1) Liste erstellen</h2>
-    <div class="row">
-      <input id="listName" placeholder="z.B. Supermarkt" style="flex:1">
-      <button id="createListBtn">Erstellen</button>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Einkaufslisten</h1>
+      <div class="subtitle">UI nutzt deine API unter <code>/lists...</code></div>
     </div>
-    <p class="muted">Tipp: nach dem Erstellen ID merken (wir zeigen sie unten).</p>
-  </div>
+    <div class="pill" id="activePill">Aktive Liste: —</div>
+  </header>
 
-  <div class="card">
-    <h2>2) Liste auswählen</h2>
-    <div class="row">
-      <input id="listId" type="number" min="1" placeholder="List ID (z.B. 1)" style="width:220px">
-      <button id="loadBtn">Laden</button>
-      <button id="deleteListBtn">Liste löschen</button>
+  <div class="grid">
+    <!-- LEFT -->
+    <div class="card">
+      <h2>Liste erstellen</h2>
+      <div class="row">
+        <input id="listName" class="w-1" placeholder="z.B. Supermarkt">
+        <button id="createListBtn" class="btn btn-primary">Erstellen</button>
+      </div>
+      <div class="muted" style="margin-top:8px;">Tipp: Enter drücken → Liste wird erstellt.</div>
+
+      <div class="divider"></div>
+
+      <h2>Liste auswählen</h2>
+      <div class="row">
+        <input id="listId" class="w-1" type="number" min="1" placeholder="List ID (z.B. 1)">
+        <button id="loadBtn" class="btn">Laden</button>
+        <button id="deleteListBtn" class="btn btn-danger">Liste löschen</button>
+      </div>
+
+      <div id="listInfo" class="infoBox">Noch keine Liste geladen.</div>
     </div>
-    <div id="listInfo" class="muted" style="margin-top:10px;"></div>
-  </div>
 
-  <div class="card">
-    <h2>3) Item hinzufügen</h2>
-    <div class="row">
-      <input id="itemName" placeholder="z.B. Banane" style="flex:1">
-      <input id="itemQty" type="number" min="1" value="1" style="width:120px">
-      <button id="addItemBtn">Hinzufügen</button>
+    <!-- RIGHT -->
+    <div class="card">
+      <h2>Item hinzufügen</h2>
+      <div class="row">
+        <input id="itemName" class="w-1" placeholder="z.B. Banane">
+        <input id="itemQty" class="w-small" type="number" min="1" value="1">
+        <button id="addItemBtn" class="btn btn-primary">Hinzufügen</button>
+      </div>
+      <div class="muted" style="margin-top:8px;">Tipp: Enter im Item-Feld → wird hinzugefügt.</div>
+
+      <div class="divider"></div>
+
+      <h2>Items</h2>
+      <ul id="items" class="items"></ul>
+      <div id="empty" class="empty" style="display:none;">Noch keine Items. Oben eins hinzufügen 👆</div>
     </div>
   </div>
-
-  <div class="card">
-    <h2>Items</h2>
-    <ul id="items" class="items"></ul>
-  </div>
+</div>
 
 <script>
   const $ = (id) => document.getElementById(id);
+
+  function toast(msg) {
+    const el = $('toast');
+    el.innerHTML = msg;
+    el.style.display = 'block';
+    clearTimeout(window.__toastT);
+    window.__toastT = setTimeout(() => el.style.display = 'none', 2600);
+  }
 
   function currentListId() {
     const v = parseInt($('listId').value, 10);
@@ -63,87 +343,178 @@
       headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
       ...opts,
     });
+
     if (res.status === 204) return null;
+
     const text = await res.text();
     let data = null;
     try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+
     if (!res.ok) {
       throw new Error((data && data.error) ? data.error : ('HTTP ' + res.status));
     }
     return data;
   }
 
-  async function loadItems() {
-    const id = currentListId();
-    if (!id) { $('listInfo').textContent = 'Bitte List ID eingeben.'; return; }
+  function setActivePill(id) {
+    $('activePill').textContent = id ? `Aktive Liste: #${id}` : 'Aktive Liste: —';
+  }
 
-    const items = await api(`/lists/${id}/items`, { method: 'GET' });
+  function renderItems(items, listId) {
     $('items').innerHTML = items.map(it => `
-      <li>
-        <span>#${it.id} — ${it.name} (x${it.quantity})</span>
-        <span>
-          <button onclick="deleteItem(${id}, ${it.id})">🗑️</button>
-        </span>
+      <li class="itemRow">
+        <div class="itemLeft">
+          <span class="badge">#${it.id}</span>
+          <div style="min-width:0">
+            <div class="itemTitle">${escapeHtml(it.name)}</div>
+            <div class="qty">Menge: x${it.quantity}</div>
+          </div>
+        </div>
+        <div class="iconBtns">
+          <button class="iconBtn" title="Bearbeiten" onclick="editItem(${listId}, ${it.id}, '${escapeAttr(it.name)}', ${it.quantity})">✏️</button>
+          <button class="iconBtn danger" title="Löschen" onclick="deleteItem(${listId}, ${it.id})">🗑️</button>
+        </div>
       </li>
     `).join('');
 
-    $('listInfo').textContent = `Liste ${id} geladen. Items: ${items.length}`;
+    const empty = $('empty');
+    empty.style.display = items.length ? 'none' : 'block';
+  }
+
+  async function loadItems() {
+    const id = currentListId();
+    if (!id) { $('listInfo').textContent = 'Bitte List ID eingeben.'; setActivePill(null); return; }
+
+    const items = await api(`/lists/${id}/items`, { method: 'GET' });
+
+    renderItems(items, id);
+    $('listInfo').textContent = `Liste #${id} geladen. Items: ${items.length}`;
+    setActivePill(id);
   }
 
   window.deleteItem = async (listId, itemId) => {
     await api(`/lists/${listId}/items/${itemId}`, { method: 'DELETE' });
+    toast(`✅ Item #${itemId} gelöscht`);
+    await loadItems();
+  };
+
+  window.editItem = async (listId, itemId, name, quantity) => {
+    const newName = prompt("Name:", name);
+    if (newName === null) return;
+
+    const newQtyRaw = prompt("Menge:", String(quantity));
+    if (newQtyRaw === null) return;
+
+    const newQty = parseInt(newQtyRaw, 10);
+    if (!newName.trim() || !Number.isFinite(newQty) || newQty < 1) {
+      toast("❌ Ungültige Eingabe");
+      return;
+    }
+
+    await api(`/lists/${listId}/items/${itemId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ name: newName.trim(), quantity: newQty })
+    });
+
+    toast(`✅ Item #${itemId} aktualisiert`);
     await loadItems();
   };
 
   $('createListBtn').onclick = async () => {
-    const name = $('listName').value.trim();
-    if (!name) return alert('Bitte Listennamen eingeben.');
+    try{
+      const name = $('listName').value.trim();
+      if (!name) return toast('❌ Bitte Listennamen eingeben.');
 
-    const created = await api('/lists', {
-      method: 'POST',
-      body: JSON.stringify({ name, items: [] })
-    });
+      const created = await api('/lists', {
+        method: 'POST',
+        body: JSON.stringify({ name, items: [] })
+      });
 
-    $('listId').value = created.id;
-    $('listName').value = '';
-    $('listInfo').textContent = `Liste erstellt: ID ${created.id}, Name "${created.name}"`;
-    await loadItems();
+      $('listId').value = created.id;
+      $('listName').value = '';
+      toast(`✅ Liste erstellt: #${created.id} (${created.name})`);
+      await loadItems();
+    } catch(e){
+      toast('❌ ' + e.message);
+    }
   };
 
   $('loadBtn').onclick = async () => {
     try { await loadItems(); }
-    catch (e) { alert(e.message); }
+    catch (e) { toast('❌ ' + e.message); }
   };
 
   $('addItemBtn').onclick = async () => {
-    const id = currentListId();
-    if (!id) return alert('Bitte List ID eingeben.');
+    try{
+      const id = currentListId();
+      if (!id) return toast('❌ Bitte List ID eingeben.');
 
-    const name = $('itemName').value.trim();
-    const quantity = parseInt($('itemQty').value, 10) || 1;
+      const name = $('itemName').value.trim();
+      const quantity = parseInt($('itemQty').value, 10) || 1;
 
-    if (!name) return alert('Bitte Item-Name eingeben.');
-    if (quantity < 1) return alert('Quantity muss >= 1 sein.');
+      if (!name) return toast('❌ Bitte Item-Name eingeben.');
+      if (quantity < 1) return toast('❌ Quantity muss >= 1 sein.');
 
-    await api(`/lists/${id}/item`, {
-      method: 'POST',
-      body: JSON.stringify({ name, quantity })
-    });
+      await api(`/lists/${id}/item`, {
+        method: 'POST',
+        body: JSON.stringify({ name, quantity })
+      });
 
-    $('itemName').value = '';
-    $('itemQty').value = 1;
-    await loadItems();
+      $('itemName').value = '';
+      $('itemQty').value = 1;
+      toast('✅ Item hinzugefügt');
+      await loadItems();
+    } catch(e){
+      toast('❌ ' + e.message);
+    }
   };
 
   $('deleteListBtn').onclick = async () => {
-    const id = currentListId();
-    if (!id) return alert('Bitte List ID eingeben.');
-    if (!confirm('Liste wirklich löschen?')) return;
+    try{
+      const id = currentListId();
+      if (!id) return toast('❌ Bitte List ID eingeben.');
+      if (!confirm(`Liste #${id} wirklich löschen?`)) return;
 
-    await api(`/lists/${id}`, { method: 'DELETE' });
-    $('items').innerHTML = '';
-    $('listInfo').textContent = `Liste ${id} gelöscht.`;
+      await api(`/lists/${id}`, { method: 'DELETE' });
+      $('items').innerHTML = '';
+      $('empty').style.display = 'none';
+      $('listInfo').textContent = `Liste #${id} gelöscht.`;
+      setActivePill(null);
+      toast(`✅ Liste #${id} gelöscht`);
+    } catch(e){
+      toast('❌ ' + e.message);
+    }
   };
+
+  // Enter-shortcuts
+  $('listName').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') $('createListBtn').click();
+  });
+  $('listId').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') $('loadBtn').click();
+  });
+  $('itemName').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') $('addItemBtn').click();
+  });
+  $('itemQty').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') $('addItemBtn').click();
+  });
+
+  // Escaping helpers (gegen kaputte HTML/Quotes)
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'","&#039;");
+  }
+  function escapeAttr(str){
+    // Für onclick '...'
+    return String(str).replaceAll("\\","\\\\").replaceAll("'","\\'");
+  }
+
+   
 </script>
 
 </body>
