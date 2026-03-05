@@ -37,6 +37,7 @@ http://localhost:8000/
 * MySQL
 * Twig
 * JavaScript (Fetch API)
+* XAMPP
 
 ---
 
