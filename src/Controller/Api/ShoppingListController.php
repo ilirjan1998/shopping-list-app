@@ -130,6 +130,26 @@ final class ShoppingListController
     }
 
     // ---------------------------
+    // GET /lists
+    // Get all lists (id + name)
+    // ---------------------------
+    #[Route('/lists', name: 'api_lists_get_all', methods: ['GET'])]
+    public function getAllLists(EntityManagerInterface $em): JsonResponse
+    {
+        $lists = $em->getRepository(ShoppingList::class)->findBy([], ['id' => 'DESC']);
+
+        $out = [];
+        foreach ($lists as $list) {
+            $out[] = [
+                'id' => $list->getId(),
+                'name' => $list->getName(),
+            ];
+        }
+
+        return new JsonResponse($out, 200);
+    }
+
+    // ---------------------------
     // GET /lists/{id}/items/{itemId}
     // Get one item (must belong to the list)
     // ---------------------------

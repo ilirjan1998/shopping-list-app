@@ -104,7 +104,7 @@
       flex-wrap: wrap;
     }
 
-    input{
+    input, select{
       width: 100%;
       padding: 12px 12px;
       border-radius: 12px;
@@ -113,7 +113,7 @@
       font-size: 14px;
       background: #fff;
     }
-    input:focus{
+    input:focus, select:focus{
       border-color: rgba(17,24,39,.35);
       box-shadow: 0 0 0 4px rgba(17,24,39,.08);
     }
@@ -134,7 +134,8 @@
       user-select:none;
       white-space: nowrap;
     }
-    .btn:hover{ background: red; }
+    /* FIX: nicht rot */
+    .btn:hover{ background:#f9fafb; }
     .btn:active{ transform: translateY(1px); }
 
     .btn-primary{
@@ -295,7 +296,7 @@
 
       <h2>Liste auswählen</h2>
       <div class="row">
-        <input id="listId" class="w-1" type="number" min="1" placeholder="List ID (z.B. 1)">
+        <select id="listSelect" class="w-1"></select>
         <button id="loadBtn" class="btn">Laden</button>
         <button id="deleteListBtn" class="btn btn-danger">Liste löschen</button>
       </div>
@@ -333,11 +334,6 @@
     window.__toastT = setTimeout(() => el.style.display = 'none', 2600);
   }
 
-  function currentListId() {
-    const v = parseInt($('listId').value, 10);
-    return Number.isFinite(v) && v > 0 ? v : null;
-  }
-
   async function api(path, opts = {}) {
     const res = await fetch(path, {
       headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
@@ -360,6 +356,31 @@
     $('activePill').textContent = id ? `Aktive Liste: #${id}` : 'Aktive Liste: —';
   }
 
+  function currentListId() {
+    const v = parseInt($('listSelect').value, 10);
+    return Number.isFinite(v) && v > 0 ? v : null;
+  }
+
+  async function loadLists(selectId = null) {
+    const lists = await api('/lists', { method: 'GET' });
+    const sel = $('listSelect');
+
+    if (!Array.isArray(lists) || lists.length === 0) {
+      sel.innerHTML = `<option value="">Keine Listen vorhanden</option>`;
+      $('listInfo').textContent = 'Keine Listen vorhanden.';
+      setActivePill(null);
+      $('items').innerHTML = '';
+      $('empty').style.display = 'none';
+      return;
+    }
+
+    sel.innerHTML = lists
+      .map(l => `<option value="${l.id}">#${l.id} – ${escapeHtml(l.name)}</option>`)
+      .join('');
+
+    if (selectId) sel.value = String(selectId);
+  }
+
   function renderItems(items, listId) {
     $('items').innerHTML = items.map(it => `
       <li class="itemRow">
@@ -371,53 +392,72 @@
           </div>
         </div>
         <div class="iconBtns">
-          <button class="iconBtn" title="Bearbeiten" onclick="editItem(${listId}, ${it.id}, '${escapeAttr(it.name)}', ${it.quantity})">✏️</button>
+          <!-- FIX: Name sicher als JSON übergeben -->
+          <button class="iconBtn" title="Bearbeiten"
+            onclick='editItem(${listId}, ${it.id}, ${JSON.stringify(it.name)}, ${it.quantity})'>✏️</button>
           <button class="iconBtn danger" title="Löschen" onclick="deleteItem(${listId}, ${it.id})">🗑️</button>
         </div>
       </li>
     `).join('');
 
-    const empty = $('empty');
-    empty.style.display = items.length ? 'none' : 'block';
+    $('empty').style.display = items.length ? 'none' : 'block';
   }
 
   async function loadItems() {
-    const id = currentListId();
-    if (!id) { $('listInfo').textContent = 'Bitte List ID eingeben.'; setActivePill(null); return; }
+    try {
+      const id = currentListId();
+      if (!id) {
+        $('listInfo').textContent = 'Bitte eine Liste auswählen.';
+        setActivePill(null);
+        $('items').innerHTML = '';
+        $('empty').style.display = 'none';
+        return;
+      }
 
-    const items = await api(`/lists/${id}/items`, { method: 'GET' });
+      const items = await api(`/lists/${id}/items`, { method: 'GET' });
 
-    renderItems(items, id);
-    $('listInfo').textContent = `Liste #${id} geladen. Items: ${items.length}`;
-    setActivePill(id);
+      renderItems(items, id);
+      $('listInfo').textContent = `Liste #${id} geladen. Items: ${items.length}`;
+      setActivePill(id);
+    } catch (e) {
+      toast('❌ ' + e.message);
+    }
   }
 
   window.deleteItem = async (listId, itemId) => {
-    await api(`/lists/${listId}/items/${itemId}`, { method: 'DELETE' });
-    toast(`✅ Item #${itemId} gelöscht`);
-    await loadItems();
+    try {
+      await api(`/lists/${listId}/items/${itemId}`, { method: 'DELETE' });
+      toast(`✅ Item #${itemId} gelöscht`);
+      await loadItems();
+    } catch (e) {
+      toast('❌ ' + e.message);
+    }
   };
 
   window.editItem = async (listId, itemId, name, quantity) => {
-    const newName = prompt("Name:", name);
-    if (newName === null) return;
+    try {
+      const newName = prompt("Name:", name);
+      if (newName === null) return;
 
-    const newQtyRaw = prompt("Menge:", String(quantity));
-    if (newQtyRaw === null) return;
+      const newQtyRaw = prompt("Menge:", String(quantity));
+      if (newQtyRaw === null) return;
 
-    const newQty = parseInt(newQtyRaw, 10);
-    if (!newName.trim() || !Number.isFinite(newQty) || newQty < 1) {
-      toast("❌ Ungültige Eingabe");
-      return;
+      const newQty = parseInt(newQtyRaw, 10);
+      if (!newName.trim() || !Number.isFinite(newQty) || newQty < 1) {
+        toast("❌ Ungültige Eingabe");
+        return;
+      }
+
+      await api(`/lists/${listId}/items/${itemId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ name: newName.trim(), quantity: newQty })
+      });
+
+      toast(`✅ Item #${itemId} aktualisiert`);
+      await loadItems();
+    } catch (e) {
+      toast('❌ ' + e.message);
     }
-
-    await api(`/lists/${listId}/items/${itemId}`, {
-      method: 'PUT',
-      body: JSON.stringify({ name: newName.trim(), quantity: newQty })
-    });
-
-    toast(`✅ Item #${itemId} aktualisiert`);
-    await loadItems();
   };
 
   $('createListBtn').onclick = async () => {
@@ -430,24 +470,24 @@
         body: JSON.stringify({ name, items: [] })
       });
 
-      $('listId').value = created.id;
       $('listName').value = '';
       toast(`✅ Liste erstellt: #${created.id} (${created.name})`);
-      await loadItems();
+
+      await loadLists(created.id);   // Dropdown refresh + neue Liste auswählen
+      await loadItems();             // Items der neuen Liste laden
     } catch(e){
       toast('❌ ' + e.message);
     }
   };
 
   $('loadBtn').onclick = async () => {
-    try { await loadItems(); }
-    catch (e) { toast('❌ ' + e.message); }
+    await loadItems();
   };
 
   $('addItemBtn').onclick = async () => {
     try{
       const id = currentListId();
-      if (!id) return toast('❌ Bitte List ID eingeben.');
+      if (!id) return toast('❌ Bitte eine Liste auswählen.');
 
       const name = $('itemName').value.trim();
       const quantity = parseInt($('itemQty').value, 10) || 1;
@@ -472,15 +512,18 @@
   $('deleteListBtn').onclick = async () => {
     try{
       const id = currentListId();
-      if (!id) return toast('❌ Bitte List ID eingeben.');
+      if (!id) return toast('❌ Bitte eine Liste auswählen.');
       if (!confirm(`Liste #${id} wirklich löschen?`)) return;
 
       await api(`/lists/${id}`, { method: 'DELETE' });
+
+      toast(`✅ Liste #${id} gelöscht`);
+      setActivePill(null);
+      $('listInfo').textContent = `Liste #${id} gelöscht.`;
+
+      await loadLists(); // Dropdown refresh
       $('items').innerHTML = '';
       $('empty').style.display = 'none';
-      $('listInfo').textContent = `Liste #${id} gelöscht.`;
-      setActivePill(null);
-      toast(`✅ Liste #${id} gelöscht`);
     } catch(e){
       toast('❌ ' + e.message);
     }
@@ -490,9 +533,6 @@
   $('listName').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') $('createListBtn').click();
   });
-  $('listId').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') $('loadBtn').click();
-  });
   $('itemName').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') $('addItemBtn').click();
   });
@@ -500,7 +540,12 @@
     if (e.key === 'Enter') $('addItemBtn').click();
   });
 
-  // Escaping helpers (gegen kaputte HTML/Quotes)
+  // optional: sofort laden wenn Dropdown geändert wird
+  $('listSelect').addEventListener('change', () => {
+    loadItems();
+  });
+
+  // Escaping helper
   function escapeHtml(str){
     return String(str)
       .replaceAll('&','&amp;')
@@ -509,12 +554,9 @@
       .replaceAll('"','&quot;')
       .replaceAll("'","&#039;");
   }
-  function escapeAttr(str){
-    // Für onclick '...'
-    return String(str).replaceAll("\\","\\\\").replaceAll("'","\\'");
-  }
 
-   
+  // Start
+  loadLists().then(loadItems).catch(e => toast('❌ ' + e.message));
 </script>
 
 </body>
