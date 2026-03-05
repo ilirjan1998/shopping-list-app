@@ -26,7 +26,7 @@ http://localhost:8000/app
 ## Screenshot
 
 ![App Screenshot](einkaufsliste.png)
-
+ 
 ---
 
 # Technologien
