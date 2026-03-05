@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Einkaufslisten</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 24px auto; }
+    .row { display:flex; gap:12px; }
+    input, button { padding:10px; }
+    button { cursor:pointer; }
+    .card { border:1px solid #ddd; border-radius:10px; padding:16px; margin-top:16px; }
+    .items li { display:flex; justify-content:space-between; padding:6px 0; }
+    .muted { color:#666; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>Einkaufslisten</h1>
+  <p class="muted">UI nutzt deine API (Symfony Controller unter <code>/lists...</code>)</p>
+
+  <div class="card">
+    <h2>1) Liste erstellen</h2>
+    <div class="row">
+      <input id="listName" placeholder="z.B. Supermarkt" style="flex:1">
+      <button id="createListBtn">Erstellen</button>
+    </div>
+    <p class="muted">Tipp: nach dem Erstellen ID merken (wir zeigen sie unten).</p>
+  </div>
+
+  <div class="card">
+    <h2>2) Liste auswählen</h2>
+    <div class="row">
+      <input id="listId" type="number" min="1" placeholder="List ID (z.B. 1)" style="width:220px">
+      <button id="loadBtn">Laden</button>
+      <button id="deleteListBtn">Liste löschen</button>
+    </div>
+    <div id="listInfo" class="muted" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>3) Item hinzufügen</h2>
+    <div class="row">
+      <input id="itemName" placeholder="z.B. Banane" style="flex:1">
+      <input id="itemQty" type="number" min="1" value="1" style="width:120px">
+      <button id="addItemBtn">Hinzufügen</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Items</h2>
+    <ul id="items" class="items"></ul>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  function currentListId() {
+    const v = parseInt($('listId').value, 10);
+    return Number.isFinite(v) && v > 0 ? v : null;
+  }
+
+  async function api(path, opts = {}) {
+    const res = await fetch(path, {
+      headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
+      ...opts,
+    });
+    if (res.status === 204) return null;
+    const text = await res.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+    if (!res.ok) {
+      throw new Error((data && data.error) ? data.error : ('HTTP ' + res.status));
+    }
+    return data;
+  }
+
+  async function loadItems() {
+    const id = currentListId();
+    if (!id) { $('listInfo').textContent = 'Bitte List ID eingeben.'; return; }
+
+    const items = await api(`/lists/${id}/items`, { method: 'GET' });
+    $('items').innerHTML = items.map(it => `
+      <li>
+        <span>#${it.id} — ${it.name} (x${it.quantity})</span>
+        <span>
+          <button onclick="deleteItem(${id}, ${it.id})">🗑️</button>
+        </span>
+      </li>
+    `).join('');
+
+    $('listInfo').textContent = `Liste ${id} geladen. Items: ${items.length}`;
+  }
+
+  window.deleteItem = async (listId, itemId) => {
+    await api(`/lists/${listId}/items/${itemId}`, { method: 'DELETE' });
+    await loadItems();
+  };
+
+  $('createListBtn').onclick = async () => {
+    const name = $('listName').value.trim();
+    if (!name) return alert('Bitte Listennamen eingeben.');
+
+    const created = await api('/lists', {
+      method: 'POST',
+      body: JSON.stringify({ name, items: [] })
+    });
+
+    $('listId').value = created.id;
+    $('listName').value = '';
+    $('listInfo').textContent = `Liste erstellt: ID ${created.id}, Name "${created.name}"`;
+    await loadItems();
+  };
+
+  $('loadBtn').onclick = async () => {
+    try { await loadItems(); }
+    catch (e) { alert(e.message); }
+  };
+
+  $('addItemBtn').onclick = async () => {
+    const id = currentListId();
+    if (!id) return alert('Bitte List ID eingeben.');
+
+    const name = $('itemName').value.trim();
+    const quantity = parseInt($('itemQty').value, 10) || 1;
+
+    if (!name) return alert('Bitte Item-Name eingeben.');
+    if (quantity < 1) return alert('Quantity muss >= 1 sein.');
+
+    await api(`/lists/${id}/item`, {
+      method: 'POST',
+      body: JSON.stringify({ name, quantity })
+    });
+
+    $('itemName').value = '';
+    $('itemQty').value = 1;
+    await loadItems();
+  };
+
+  $('deleteListBtn').onclick = async () => {
+    const id = currentListId();
+    if (!id) return alert('Bitte List ID eingeben.');
+    if (!confirm('Liste wirklich löschen?')) return;
+
+    await api(`/lists/${id}`, { method: 'DELETE' });
+    $('items').innerHTML = '';
+    $('listInfo').textContent = `Liste ${id} gelöscht.`;
+  };
+</script>
+
+</body>
+</html>
