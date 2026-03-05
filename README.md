@@ -25,7 +25,7 @@ http://localhost:8000/app
 
 ## Screenshot
 
-![App Screenshot](einkaufliste.png)
+![App Screenshot](einkaufsliste.png)
 
 ---
 
