@@ -16,11 +16,6 @@ Das Projekt wurde mit **Symfony** entwickelt und speichert Daten in einer **MySQ
 * Items löschen
 * Einkaufslisten löschen
 
-
-```
-http://localhost:8000/
-```
-
 --- 
 
 ## Screenshot
@@ -57,6 +52,11 @@ Dependencies installieren:
 composer install
 ```
 
+### XAMPP starten
+
+Apache und MySQL im XAMPP Control Panel starten.
+
+
 Datenbank konfigurieren in:
 
 ```
@@ -87,7 +87,7 @@ php -S localhost:8000 -t public
 Danach im Browser öffnen:
 
 ```
-http://localhost:8000/app
+http://localhost:8000/
 ```
 
 ---
