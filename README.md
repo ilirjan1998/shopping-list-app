@@ -20,7 +20,14 @@ Zusätzlich gibt es eine einfache Weboberfläche unter:
 
 ```
 http://localhost:8000/app
+
 ```
+
+## Screenshot
+
+![App Screenshot](einkaufliste.png)
+
+
 
 ---
 
