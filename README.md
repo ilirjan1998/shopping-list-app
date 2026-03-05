@@ -16,13 +16,12 @@ Das Projekt wurde mit **Symfony** entwickelt und speichert Daten in einer **MySQ
 * Items löschen
 * Einkaufslisten löschen
 
-Zusätzlich gibt es eine einfache Weboberfläche unter:
 
 ```
-http://localhost:8000/app
+http://localhost:8000/
 ```
 
----
+--- 
 
 ## Screenshot
 
