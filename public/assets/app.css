@@ -129,7 +129,7 @@
       white-space: nowrap;
     }
     /* FIX: nicht rot */
-    .btn:hover{ background:#f9fafb; }
+    
     .btn:active{ transform: translateY(1px); }
 
     .btn-primary{
