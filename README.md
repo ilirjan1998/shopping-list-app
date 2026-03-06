@@ -25,7 +25,7 @@ Das Projekt wurde mit **Symfony** entwickelt und speichert Daten in einer **MySQ
 
 ---
 
-## Technologien
+## Technologien 
 
 * PHP
 * Symfony
